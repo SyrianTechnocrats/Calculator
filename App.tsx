@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, TrendingUp, RefreshCw, AlertCircle, WifiOff, Share, Download } from 'lucide-react';
+import { Calculator, TrendingUp, RefreshCw, AlertCircle, WifiOff, Share, Download, Coins } from 'lucide-react';
 import ConverterCard from './components/ConverterCard';
 import ChangeCalculator from './components/ChangeCalculator';
+import PaymentSuggester from './components/PaymentSuggester';
 
 const CACHE_KEY = 'syp_usd_rate';
 const CACHE_EXPIRY = 12 * 60 * 60 * 1000; // 12 ساعة
@@ -10,6 +11,7 @@ const App: React.FC = () => {
   const [usdRate, setUsdRate] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
+  const [currentAmountOld, setCurrentAmountOld] = useState<number>(0);
   
   // PWA States
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -66,7 +68,6 @@ const App: React.FC = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // PWA Install logic
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -75,12 +76,10 @@ const App: React.FC = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // iOS Detection
     const userAgent = window.navigator.userAgent.toLowerCase();
     const ios = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(ios);
 
-    // Check if already installed
     const standalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
     setIsStandalone(standalone);
 
@@ -120,7 +119,7 @@ const App: React.FC = () => {
               <RefreshCw size={14} className="animate-spin" />
             ) : (
               <span className="text-lg font-black text-white">
-                {usdRate ? `${Math.round(usdRate).toLocaleString('ar-SY')} ل.س` : '---'}
+                {usdRate ? `${Math.round(usdRate).toLocaleString('en-US')} ل.س` : '---'}
               </span>
             )}
             <button 
@@ -175,9 +174,20 @@ const App: React.FC = () => {
         <section>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-1 h-6 bg-[#17683c] rounded-full"></div>
-            <h2 className="text-lg font-bold text-gray-700">تحويل الليرة السورية القديمة والجديدة</h2>
+            <h2 className="text-lg font-bold text-gray-700">تحويل العملة</h2>
           </div>
-          <ConverterCard usdRate={usdRate} />
+          <ConverterCard 
+            usdRate={usdRate} 
+            onAmountChange={setCurrentAmountOld} 
+          />
+        </section>
+
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-1 h-6 bg-emerald-500 rounded-full"></div>
+            <h2 className="text-lg font-bold text-gray-700">كيف أدفع؟ (خليط فئات)</h2>
+          </div>
+          <PaymentSuggester amountOld={currentAmountOld} />
         </section>
 
         <section className="pb-4">

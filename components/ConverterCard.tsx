@@ -4,6 +4,7 @@ import { Copy, Check, RotateCcw, DollarSign } from 'lucide-react';
 
 interface ConverterCardProps {
   usdRate: number | null;
+  onAmountChange?: (amountOld: number) => void;
 }
 
 const InputField = ({ label, value, onChange, placeholder, suffix, colorClass, badge, icon }: any) => (
@@ -26,7 +27,7 @@ const InputField = ({ label, value, onChange, placeholder, suffix, colorClass, b
   </div>
 );
 
-const ConverterCard: React.FC<ConverterCardProps> = ({ usdRate }) => {
+const ConverterCard: React.FC<ConverterCardProps> = ({ usdRate, onAmountChange }) => {
   const [oldValue, setOldValue] = useState<string>('');
   const [newValue, setNewValue] = useState<string>('');
   const [usdValue, setUsdValue] = useState<string>('');
@@ -44,10 +45,12 @@ const ConverterCard: React.FC<ConverterCardProps> = ({ usdRate }) => {
     if (val === '' || val === '.') {
       setNewValue('');
       setUsdValue('');
+      onAmountChange?.(0);
     } else {
       const num = parseFloat(val);
       setNewValue(formatValue(num / 100));
       if (usdRate) setUsdValue(formatValue(num / usdRate));
+      onAmountChange?.(num);
     }
   };
 
@@ -58,11 +61,13 @@ const ConverterCard: React.FC<ConverterCardProps> = ({ usdRate }) => {
     if (val === '' || val === '.') {
       setOldValue('');
       setUsdValue('');
+      onAmountChange?.(0);
     } else {
       const num = parseFloat(val);
       const old = num * 100;
       setOldValue(formatValue(old));
       if (usdRate) setUsdValue(formatValue(old / usdRate));
+      onAmountChange?.(old);
     }
   };
 
@@ -73,11 +78,13 @@ const ConverterCard: React.FC<ConverterCardProps> = ({ usdRate }) => {
     if (val === '' || val === '.' || !usdRate) {
       setOldValue('');
       setNewValue('');
+      onAmountChange?.(0);
     } else {
       const num = parseFloat(val);
       const old = num * usdRate;
       setOldValue(formatValue(old));
       setNewValue(formatValue(old / 100));
+      onAmountChange?.(old);
     }
   };
 
@@ -86,6 +93,7 @@ const ConverterCard: React.FC<ConverterCardProps> = ({ usdRate }) => {
     setNewValue('');
     setUsdValue('');
     setLastUpdated(null);
+    onAmountChange?.(0);
   };
 
   const copyToClipboard = () => {

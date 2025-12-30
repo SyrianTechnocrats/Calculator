@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Banknote, ShoppingCart, Wallet, AlertCircle, ArrowLeftRight } from 'lucide-react';
 
@@ -87,7 +86,7 @@ const ChangeCalculator: React.FC = () => {
               <div className="p-4 bg-white text-center">
                 <span className="block text-xs text-blue-600 font-bold mb-1">الباقي بالليرة (الجديدة):</span>
                 <div className="text-3xl font-black text-blue-700">
-                  {changeNew.toLocaleString('ar-SY')}
+                  {changeNew.toLocaleString('en-US')}
                   <span className="text-sm mr-2 opacity-70">ل.س</span>
                 </div>
               </div>
@@ -102,7 +101,7 @@ const ChangeCalculator: React.FC = () => {
               <div className="p-4 bg-emerald-50/50 border-t border-emerald-100 text-center">
                 <span className="block text-xs text-emerald-700 font-bold mb-1">الباقي بالليرة (القديمة):</span>
                 <div className="text-3xl font-black text-emerald-800">
-                  {changeOld?.toLocaleString('ar-SY')}
+                  {changeOld?.toLocaleString('en-US')}
                   <span className="text-sm mr-2 opacity-70">ل.س</span>
                 </div>
               </div>
