@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, TrendingUp, RefreshCw, AlertCircle, WifiOff, Share, Download, Coins } from 'lucide-react';
+import { Calculator, TrendingUp, RefreshCw, AlertCircle, WifiOff, Share2, Download, Coins } from 'lucide-react';
 import ConverterCard from './components/ConverterCard';
 import ChangeCalculator from './components/ChangeCalculator';
 import PaymentSuggester from './components/PaymentSuggester';
@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const [showInstallBtn, setShowInstallBtn] = useState<boolean>(false);
   const [isIOS, setIsIOS] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState<boolean>(false);
+  const [showIOSInstructions, setShowIOSInstructions] = useState<boolean>(false);
 
   const fetchRate = async (force = false) => {
     const saved = localStorage.getItem(CACHE_KEY);
@@ -76,12 +77,20 @@ const App: React.FC = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+    // Detect iOS
     const userAgent = window.navigator.userAgent.toLowerCase();
     const ios = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(ios);
 
-    const standalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
+    // Detect if already installed
+    const standalone = (window.navigator as any).standalone || 
+                      window.matchMedia('(display-mode: standalone)').matches;
     setIsStandalone(standalone);
+
+    // On iOS, show install button if not already installed
+    if (ios && !standalone) {
+      setShowIOSInstructions(true);
+    }
 
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -98,6 +107,10 @@ const App: React.FC = () => {
       setShowInstallBtn(false);
       setDeferredPrompt(null);
     }
+  };
+
+  const handleIOSInstallClick = () => {
+    setShowIOSInstructions(!showIOSInstructions);
   };
 
   return (
@@ -149,23 +162,57 @@ const App: React.FC = () => {
 
       {/* Install PWA Banner */}
       {!isStandalone && (
-        <div className="px-6 py-4">
-          {showInstallBtn ? (
+        <div className="px-6 py-4 space-y-3">
+          {/* Android/Chrome Install Button */}
+          {showInstallBtn && (
             <button 
               onClick={handleInstallClick}
-              className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-md active:scale-95"
+              className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95"
             >
               <Download size={20} />
-              أضف التطبيق إلى الهاتف
+              ثبّت التطبيق على الهاتف
             </button>
-          ) : isIOS ? (
-            <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-center gap-3 text-blue-800 text-sm">
-              <Share size={24} className="shrink-0 text-blue-600" />
-              <p className="font-bold">
-                لتثبيت التطبيق: اضغط زر <span className="underline italic">المشاركة</span> ثم اختر <span className="underline italic">"Add to Home Screen"</span>
+          )}
+
+          {/* iOS Install Instructions */}
+          {isIOS && (
+            <div className="space-y-2">
+              <button
+                onClick={handleIOSInstallClick}
+                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95"
+              >
+                <Share2 size={20} />
+                كيفية تثبيت التطبيق (iPhone/iPad)
+              </button>
+
+              {showIOSInstructions && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 p-5 rounded-2xl shadow-inner animate-fadeIn">
+                  <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                    <Share2 size={18} className="text-blue-600" />
+                    خطوات التثبيت على iPhone/iPad:
+                  </h3>
+                  <ol className="space-y-2 text-sm text-blue-800 pr-4" style={{ listStyle: 'decimal' }}>
+                    <li className="font-semibold">اضغط على زر <span className="inline-flex items-center px-2 py-0.5 bg-blue-200 rounded mx-1">المشاركة <Share2 size={12} className="mr-1" /></span> في الأسفل (Safari)</li>
+                    <li className="font-semibold">اختر "<span className="bg-blue-200 px-2 py-0.5 rounded">Add to Home Screen</span>" من القائمة</li>
+                    <li className="font-semibold">اضغط "<span className="bg-blue-200 px-2 py-0.5 rounded">Add</span>" للتأكيد</li>
+                  </ol>
+                  <p className="text-xs text-blue-600 mt-3 italic text-center">
+                    بعد التثبيت، سيظهر التطبيق على الشاشة الرئيسية
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Fallback message if no install method available */}
+          {!showInstallBtn && !isIOS && (
+            <div className="bg-gray-50 border border-gray-200 p-4 rounded-2xl flex items-center gap-3 text-gray-600 text-sm">
+              <Download size={20} className="shrink-0 text-gray-400" />
+              <p className="font-semibold">
+                هذا التطبيق يعمل بدون تثبيت! احفظ الرابط للوصول السريع.
               </p>
             </div>
-          ) : null}
+          )}
         </div>
       )}
 
